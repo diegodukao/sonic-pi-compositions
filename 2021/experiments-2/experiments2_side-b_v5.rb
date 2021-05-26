@@ -26,10 +26,11 @@ d3 "hh hh hh hh", slow: 1, amp: 2
 d6 :silence
 
 cymbals = true
-melody = true
-melody2 = true
+melody = false
+melody2 = false
 chords = true
-counter = true
+counter = false
+arpeggio = true
 
 #d1 "bd [~ bd]  ~  [~ bd]", slow: 1, amp: 1.2
 
@@ -94,13 +95,20 @@ live_loop :bass, sync: :d0 do
   sleep 1
 end
 
+notes = (scale :d2, :minor, num_octaves: 2)
+ind = (ring 7, 6, 5, 4)
 live_loop :counter, sync: :d0 do
   if not counter then stop end
   use_synth :prophet
-  play (scale :d2, :minor, num_octaves: 2)[(ring 7,6,5,4).tick], sustain: 3, amp: 0.4
+  
+  play notes[ind.tick], sustain: 3, amp: 0.4
   sleep 4
 end
 
+chs1 = (ring (chord :d3, 'm9+5'), (chord :g3, :minor7), (chord :f3, :maj9))
+chs2 = (ring (chord :bb3, :maj9), (chord :f4, :maj9), (chord :c4, :maj9))
+pattern = 2
+chs = chs2
 live_loop :chords, sync: :d0 do
   if not chords then stop end
   use_bpm get_bpm
@@ -108,16 +116,55 @@ live_loop :chords, sync: :d0 do
   use_random_seed 2
   
   # play :g3, release: 0.2 if (spread 3, 8).look
-  play (chord :d3, 'm9+5'), amp: 0.8, decay: 0
-  sleep 2
-  
-  play (chord :g3, :minor7), amp: 0.8
-  sleep 1
-  
-  play (chord :f3, :maj9), amp: 0.8
-  sleep 1
+  if pattern == 1 then
+    play chs1.tick, amp: 0.8, decay: 0
+    sleep 2
+    
+    play chs1.tick, amp: 0.8
+    sleep 1
+    
+    play chs1.tick, amp: 0.8
+    sleep 1
+  else
+    play chs2.tick, amp: 0.8, decay: 0
+    sleep 2
+    
+    play chs2.tick, amp: 0.8
+    sleep 1
+    
+    play chs2.tick, amp: 0.8
+    sleep 1
+  end
   
 end
+
+
+live_loop :arpeggio, sync: :d0 do
+  if not arpeggio then stop end
+  use_bpm get_bpm
+  use_synth :piano
+  
+  if pattern == 1 then
+    play chs1[0].tick, amp: 0.8, decay: 0
+    sleep 2
+    
+    play chs1[1].tick, amp: 0.8
+    sleep 1
+    
+    play chs1[2].tick, amp: 0.8
+    sleep 1
+  else
+    play chs2[0].pick(1), amp: 0.8, decay: 0
+    sleep 2
+    
+    play chs2[1].tick, amp: 0.8
+    sleep 1
+    
+    play chs2[2].tick, amp: 0.8
+    sleep 1
+  end
+end
+
 
 ########
 
